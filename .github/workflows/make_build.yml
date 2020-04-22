@@ -1,0 +1,51 @@
+name: Make release build
+
+on:
+  push: { branches: [text-mesh-no-show-on-github-action-build] }
+
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+jobs:
+  releaseBuild:
+    name: Create Release Build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - WebGL
+          - StandaloneOSX # Build a macOS standalone (Intel 64-bit)
+
+    steps:
+    
+      # Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+    
+      # Cache
+      - uses: actions/cache@v1.1.0
+        with:
+          path: Library
+          key: Library
+
+      # Test
+      - name: Run tests
+        uses: webbertakken/unity-test-runner@v1.3
+        with:
+          unityVersion: 2019.2.17f1
+
+      # Build
+      - name: Build project
+        uses: webbertakken/unity-builder@v0.10
+        with:
+          unityVersion: 2019.2.17f1
+          targetPlatform: ${{ matrix.targetPlatform }}
+
+      # Output 
+      - uses: actions/upload-artifact@v1
+        with:
+          name: Build
+          path: build
