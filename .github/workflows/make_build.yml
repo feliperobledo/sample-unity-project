@@ -13,6 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        projectPath:
+          - sample-unity-project 
         targetPlatform:
           - WebGL
           - StandaloneOSX # Build a macOS standalone (Intel 64-bit)
@@ -28,8 +30,11 @@ jobs:
       # Cache
       - uses: actions/cache@v1.1.0
         with:
-          path: Library
-          key: Library
+          path: ${{ matrix.projectPath }}/Library
+          key: Library-${{ matrix.projectPath }}-${{ matrix.targetPlatform }}
+          restore-keys: |
+            Library-${{ matrix.projectPath }}-
+            Library-
 
       # Test
       - name: Run tests
